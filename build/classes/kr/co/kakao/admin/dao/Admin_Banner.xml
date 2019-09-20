@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="banner" type="kr.co.kakao.vo.Banner"/>
+	<typeAlias alias="criteria" type="kr.co.kakao.vo.Criteria"/>
+	<typeAlias alias="Product" type="kr.co.kakao.vo.Product"/>
+	
+	<!--배너 총 갯수  -->
+	<select id ="getCountAllBanner" resultClass="int">
+		select count(*)
+		from KAKAO_BANNER
+	</select>
+
+	<!-- 배너 리스트 페이지, 페이징, 정렬 --> 
+	<select id="getAllBannerByRange" resultClass="banner" parameterClass="criteria">
+		select 
+			b.banner_no no,
+			b.product_no "product.no",
+			b.banner_title title,
+			b.banner_sub_title subTitle,
+			b.banner_display_yn displayYn,
+			b.banner_priority priority,
+			b.banner_img imgName,
+			p.product_name productName
+		from (select row_number() over (order by 
+			<dynamic>
+				<isEqual property = "sort" compareValue="NEW">
+					banner_no desc
+				</isEqual>
+				<isEqual property = "sort" compareValue="PRIORITY">
+					banner_priority asc
+				</isEqual>
+				<isEqual property = "sort" compareValue="OLD">
+					banner_no asc
+				</isEqual>
+			</dynamic>
+				)row_no , b.*
+				from kakao_banner b) b, kakao_product p
+		where 
+			b.row_no >= #beginIndex# and b.row_no &lt;= #endIndex#
+		and
+			b.PRODUCT_NO = p.PRODUCT_NO
+	</select>
+
+	  <!--배너 번호로 불러오기  -->
+	<select id="getBannerByNo" resultClass="banner" parameterClass="int">
+		select 
+			b.banner_no no,
+			b.product_no "product.no",
+			b.banner_title title,
+			b.banner_sub_title subTitle,
+			b.banner_display_yn displayYn,
+			b.banner_priority priority,
+			b.banner_img imgName,
+			p.product_name productName
+		from
+			kakao_banner b, KAKAO_PRODUCT p
+		where 
+			banner_no = #value#
+		and
+			b.PRODUCT_NO = p.PRODUCT_NO
+	</select>
+	
+	<!--배너 추가하기  -->
+	<insert id="addBanner" parameterClass="banner">
+		insert into kakao_banner(BANNER_NO, PRODUCT_NO, BANNER_TITLE, BANNER_SUB_TITLE, BANNER_DISPLAY_YN, BANNER_PRIORITY, BANNER_IMG)
+		values(banner_seq.nextval, #product.no#, #title#, #subTitle#, #displayYn#, #priority#, #imgName#)
+	</insert>
+	
+	<!--배너 업데이트  -->
+	<update id="updateBanner" parameterClass="banner">
+		update kakao_banner
+		set
+			product_no = #product.no#,
+			banner_title = #title#,
+			banner_sub_title = #subTitle#,
+			banner_display_yn = #displayYn#,
+			banner_priority = #priority#,
+			banner_img = #imgName#
+		where
+			banner_no = #no#
+	</update>
+	
+	<!--배너 삭제  -->
+	<delete id="deleteBanner" parameterClass="int">
+		delete from kakao_banner
+		where banner_no = #value#
+	</delete>
+	
+	<!--배너폼에 보일 상품  -->
+	<select id="getAllProduct" resultClass="Product">
+		select
+			product_no no,
+			product_name name
+		from 
+			kakao_product
+		order by
+			2
+	</select>
+</sqlMap>

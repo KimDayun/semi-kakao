@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+
+	<typeAlias alias="store" type="kr.co.kakao.vo.Store"/>
+	
+	<select id="getAllStore" resultClass="store">
+		select	store_no as no,
+				store_name as name,
+				store_city as city,
+				store_address as address,
+				store_phone as phone,
+				store_business_hours as businessHours,
+				store_display_yn as displayYn,
+				store_latitude as latitude,
+				store_longitude as longitude
+		from kakao_store
+		order by store_no
+	</select>
+	
+	<select id="getStoreByNo" parameterClass="int" resultClass="store">
+		select	store_no as no,
+				store_name as name,
+				store_city as city,
+				store_address as address,
+				store_phone as phone,
+				store_business_hours as businessHours,
+				store_display_yn as displayYn,
+				store_latitude as latitude,
+				store_longitude as longitude
+		from kakao_store
+		where store_no = #value#
+	</select>
+	
+	<update id="updateStore" parameterClass="store">
+		update	kakao_store
+		set		store_name = #name#,
+				store_city = #city#,
+				store_address = #address#,
+				store_phone = #phone#,
+				store_business_hours = #businessHours#,
+				store_display_yn = #displayYn#,
+				store_latitude = #latitude#,
+				store_longitude = #longitude#
+		where store_no = #no#
+	</update>
+	
+	<select id="getStoreSeq" resultClass="int">
+		select store_seq.nextval from dual
+	</select>
+	
+	<insert id="insertStore" parameterClass="store">
+		insert into kakao_store(store_no, store_name, store_city, store_address, store_phone, store_business_hours, store_latitude, store_longitude)
+		values (#no#, #name#, #city#, #address#, #phone#, #businessHours#, #latitude#, #longitude#)
+	</insert>
+	
+	<delete id="deleteStoreByNo" parameterClass="int">
+		delete from kakao_store
+		where store_no = #value#
+	</delete>
+	
+</sqlMap>

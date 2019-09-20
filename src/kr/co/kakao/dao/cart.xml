@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+
+		<typeAlias alias="Cartinfo" type="kr.co.kakao.vo.CartInfo"/>
+	
+	
+	<update id="updateCartAmount" parameterClass="kr.co.kakao.vo.Cart">
+		update kakao_cart
+		set
+			cart_product_amount = #productAmount#
+		where cart_no = #no#
+	</update>
+	
+	 <select id="getCartsByMemberNo" parameterClass="int" resultClass="Cartinfo" >
+		select 
+			  C.cart_no					as cartNo,
+		      C.CART_PRODUCT_AMOUNT	 	as productAmount,
+		      C.member_no				as memberNo,
+		      C.product_no				as productNo,
+		      P.PRODUCT_NAME			as productName, 
+		      P.PRODUCT_PRICE			as price,	
+		      P.PRODUCT_IMG				as imgName
+		      
+		from 
+			  kakao_cart C, kakao_product P
+		where             
+			  C.PRODUCT_NO = P.PRODUCT_NO
+		AND 
+		      C.MEMBER_NO = #value#
+	</select>
+	
+	<delete id="deletecartproductByCartNo" parameterClass="int" >
+	DELETE 
+	FROM 
+			KAKAO_cart
+	WHERE 
+			cart_no = #value#
+	</delete>
+	
+</sqlMap>

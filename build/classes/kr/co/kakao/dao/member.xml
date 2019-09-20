@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+	
+	<typeAlias alias="member" type="kr.co.kakao.vo.Member"/>
+	<typeAlias alias="pointHistory" type="kr.co.kakao.vo.PointHistory"/>
+	
+	<insert id="insertMember" parameterClass="member">
+		insert into kakao_member (member_no, member_id, member_pwd, member_name, 
+			member_phone, member_email, member_address, member_birth, member_postal_code, member_detail_address)
+		values (member_seq.nextval, #id#, #pwd#, #name#, #phone#, #email#, #address#, #birth#, #postalCode#, #detailAddress#)
+	</insert>
+	
+	<select id="getMemberById" parameterClass="string" resultClass="member">
+		select	member_no as no,
+				member_id as id,
+				member_pwd as pwd,
+				member_name as name,
+				member_phone as phone,
+				member_email as email,
+				member_point as point,
+				member_address as address,
+				member_used_yn as usedYn,
+				member_create_date as createDate,
+				member_birth as birth,
+				member_postal_code as postalCode,
+				member_detail_address as detailAddress
+		from kakao_member
+		where member_used_yn = 'Y'
+		and member_id = #value#
+	</select>
+	
+	<select id="findMemberIdPwdByEmail" parameterClass="map" resultClass="member">
+		select	member_no as no,
+				member_id as id,
+				member_pwd as pwd,
+				member_name as name,
+				member_phone as phone,
+				member_email as email,
+				member_point as point,
+				member_address as address,
+				member_used_yn as usedYn,
+				member_create_date as createDate,
+				member_birth as birth,
+				member_postal_code as postalCode,
+				member_detail_address as detailAddress
+		from kakao_member
+		where member_used_yn = 'Y'
+		and member_email = #email#
+		and member_name = #name#
+	</select>
+	
+	<insert id="insertRegistPoint" parameterClass="pointHistory">
+		insert into kakao_point_history(point_history_no, order_no, member_no, point_history_change_point)
+		values(pointhistory_seq.nextval, 
+		<dynamic>
+			<isNotNull property="order">
+				#order.no#,
+			</isNotNull>
+			<isNull property="order">
+				null,
+			</isNull>
+		</dynamic>
+		#member.no#, #changePoint#)
+	</insert>
+	
+	<update id="updatePwd" parameterClass="map">
+		update kakao_member
+		set member_pwd = #pwd#
+		where member_no = #no#
+	</update>
+
+</sqlMap>

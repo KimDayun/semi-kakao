@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="qna" type="kr.co.kakao.vo.Qna"/>
+	<typeAlias alias="criteria" type="kr.co.kakao.vo.Criteria"/>
+	
+	<!-- 모든 qna Count 가져오기 -->
+	<select id="countAllQna" resultClass="int" parameterClass="criteria">
+		select count(*)
+		from kakao_qna 
+		where 1=1
+		<dynamic>
+			<isNotNull property="option">
+				<isEqual property="option" compareValue="title">
+					and qna_title like '%' || #keyword# || '%'
+				</isEqual>
+				<isEqual property="option" compareValue="content">
+					and qna_contents like '%' || #keyword# || '%'
+				</isEqual>
+			</isNotNull>
+		</dynamic>
+	</select>
+	
+	<!-- 모든 qna 및 페이징, 검색, 정렬 -->
+	<select id="getAllQna" resultClass="qna" parameterClass="criteria">
+		select 
+			QNA_NO no,
+			MEMBER_name "member.name",
+			memNo "member.no",
+			QNA_TITLE title,
+			QNA_CONTENTS contents,
+			QNA_CREATE_DATE createDate,
+			QNA_STATUS_YN statusYn,
+			QNA_CATEGORY category
+		from
+			(select row_number() over(order by
+			<dynamic>
+				<isEqual property="sort" compareValue="ALLNEW">
+					q.qna_no desc
+				</isEqual>
+				<isEqual property="sort" compareValue="ALLOLD">
+					q.qna_no asc
+				</isEqual>
+				<isEqual property="sort" compareValue="NOLD">
+					q.qna_no asc
+				</isEqual>
+				<isEqual property="sort" compareValue="NNEW">
+					q.qna_no desc
+				</isEqual>
+				<isEqual property="sort" compareValue="YOLD">
+					q.qna_no asc
+				</isEqual>
+				<isEqual property="sort" compareValue="YNEW">
+					q.qna_no desc
+				</isEqual>		
+			</dynamic>
+			) row_no, q.*, q.member_no memNo, m.* 
+			from 
+				kakao_qna q, kakao_member m
+			where 
+				1 = 1
+			and 
+				q.member_no = m.member_no
+			<dynamic>
+				<isEqual property="sort" compareValue="NOLD">
+					and QNA_STATUS_YN = 'N'
+				</isEqual>
+				<isEqual property="sort" compareValue="NNEW">
+					and QNA_STATUS_YN = 'N'
+				</isEqual>
+				<isEqual property="sort" compareValue="YOLD">
+					and QNA_STATUS_YN = 'Y'
+				</isEqual>
+				<isEqual property="sort" compareValue="YNEW">
+					and QNA_STATUS_YN = 'Y'
+				</isEqual>
+				<isNotEmpty property="option">
+					<isEqual property="option" compareValue="title">
+						and qna_title like '%' || #keyword# || '%'
+					</isEqual>
+					<isEqual property="option" compareValue="content">
+						and qna_contents like '%' || #keyword# || '%'
+					</isEqual>
+				</isNotEmpty>
+			</dynamic>
+			)
+			where row_no >= #beginIndex# and row_no &lt;= #endIndex#
+	</select>
+	
+	<!-- qna넘버로 qna받아오기 -->
+	<select id="getQnaByNo" resultClass="qna" parameterClass="int">
+		select 
+			q.qna_no no,
+			q.qna_title title,
+			q.qna_contents contents,
+			q.qna_create_date createDate,
+			q.qna_status_yn statusYn,
+			m.member_no "member.no",
+			m.member_name "member.name",
+			q.qna_category category
+		from 
+			kakao_qna q, kakao_member m
+		where 
+			q.member_no = m.member_no
+		and 
+			q.qna_no = #value# 
+	</select>
+	
+	<!--qna 수정하기  -->
+	<update id="updateQna" parameterClass="qna">
+		update kakao_qna
+		set
+			qna_title = #title#,
+			qna_contents = #contents#,
+			qna_status_yn = #statusYn#
+		where 
+			qna_no = #no#
+		
+	</update>
+	
+	<!--qna와 리플을 조인해서 있는지 없는지 여부 Count로 판단  -->
+	<select id="getCountQnaNReply" parameterClass="int" resultClass="int">
+		select count(*)
+		from kakao_qna q, KAKAO_QNA_REPLY r
+		where q.QNA_NO = r.QNA_NO
+		and q.QNA_NO = #value#
+	</select>
+	
+	<!--메인페이지에 금일 만들어진 qna리스트 보여주기  -->
+	<select id="getQnaByToday" resultClass="qna">
+		SELECT 
+			qna_no no,
+			member_id "member.id",
+			qna_category category,
+			qna_title title
+		from 
+			(SELECT 
+				q.qna_no,
+				M.MEMBER_ID,
+				q.qna_category,
+				q.qna_title,
+				ROW_NUMBER() over(order by q.qna_no desc) sortNum
+			from 
+				KAKAO_qna q, KAKAO_MEMBER M
+			where 
+				to_char(q.qna_create_date,'yyyyMMDD') = TO_CHAR(sysdate,'yyyyMMDD')
+			AND	
+				q.MEMBER_NO = M.MEMBER_NO
+			AND 
+				q.QNA_STATUS_YN='N')
+		where 
+			sortNum BETWEEN 1 and 7
+	</select>
+	
+</sqlMap>

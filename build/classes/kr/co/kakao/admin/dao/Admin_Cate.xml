@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="Category" type="kr.co.kakao.vo.Category"/>
+
+	<!--대분류 -->
+	<select id="getCategoryAll" resultClass="Category">
+		select 
+			cate_no no,
+			cate_name name
+		from 
+			kakao_cate
+		where
+			cat_parent_no is null	
+		order by
+			cate_no 
+	</select>
+	
+	<!--소분류 -->
+	<select id="getSubCateByNo" parameterClass="int" resultClass="Category">
+		select
+			A.cate_no no,
+			A.cate_name name,
+			A.cat_parent_no no
+		from
+			kakao_cate A,
+			kakao_cate B
+		where
+			A.cat_parent_no=B.cate_no
+		and	
+			B.cate_no = #value#
+	</select>	
+	
+	
+	<select id="getCateByParentNo" parameterClass="int" resultClass="Category">
+		select
+			A.cate_no no,
+			A.cate_name name
+		from
+			kakao_cate A
+		where
+			A.cat_parent_no= #value#
+	</select>	
+	
+		
+		
+				
+	
+</sqlMap>

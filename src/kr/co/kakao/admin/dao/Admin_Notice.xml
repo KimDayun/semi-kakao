@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="notice" type="kr.co.kakao.vo.Notice"/>
+
+	<!--공지사항 추가 -->
+	<insert id="addNotice" parameterClass="notice">
+	insert into kakao_notice 
+		(notice_no, notice_title, notice_contents, notice_category)
+	values
+		(notic_seq.nextval, #title#, #contents#, #category#)
+	</insert>
+	
+	<!--모든 공지사항 출력  -->
+	<select id="getNoticeAll" resultClass="notice">
+		select 
+			notice_no no,
+			notice_title title,
+			notice_contents contents,
+			notice_category category,
+			notice_create_date createDate
+		from 
+			kakao_notice
+		order by
+			notice_no desc
+	</select>
+	
+	<!--디테일 정보 출력  -->
+	<select id = "getNoticeByNo" resultClass="notice" parameterClass="int">
+		select
+			notice_no no,
+			notice_title title,
+			notice_contents contents,
+			notice_category category,
+			notice_create_date createDate
+		from 
+			kakao_notice
+		where 
+			notice_no = #value#
+	</select>
+	
+	<!--공지사항 삭제  -->
+	<delete id="deleteNoticeByNo" parameterClass="int">
+		delete from
+			kakao_notice
+		where
+			notice_no = #value#
+	</delete>
+	
+	<!--공지사항 업데이트  -->
+	<update id="updateNoticeByNo" parameterClass="notice">
+		update 
+			kakao_notice
+		set
+			notice_title = #title#,
+			notice_contents = #contents#,
+			notice_category = #category#
+		where
+			notice_no = #no#
+	</update>
+	
+	<!-- 토탈 게시글 페이징 처리 -->
+	<select id="totalPaging" resultClass="int">
+		select count(*)
+		from kakao_notice
+	</select>
+	
+	<!--  페이지 나눌 쿼리 페이징 처리-->
+	<select id="rangePaging" resultClass="notice" parameterClass="map">
+		select 
+			notice_no no,
+			notice_title title,
+			notice_contents contents,
+			notice_category category,
+			NOTICE_CREATE_DATE createDate
+		from
+			(select row_number() over(order by notice_no desc) row_no, n.notice_no, n.notice_title, n.notice_contents, n.notice_category, n.notice_create_date
+			from kakao_notice n)
+		where
+			row_no  >= #begin#
+		and
+			row_no  &lt;= #end#
+	</select>
+</sqlMap>

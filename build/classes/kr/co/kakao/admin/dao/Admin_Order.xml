@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+
+<typeAlias alias="order" type="kr.co.kakao.vo.Order"/>
+<typeAlias alias="criteria" type="kr.co.kakao.vo.Criteria"/>
+<typeAlias alias="main" type="kr.co.kakao.vo.AdminMain"/>
+
+	<!--멤버의 총 구매건수  -->
+	<select id="countOrderByMemberNo" resultClass="int" parameterClass="int">
+		select count(*)
+		from kakao_order o, kakao_member m
+		where o.MEMBER_NO = #value#
+		and o.order_cancel_yn = 'N'
+	</select>
+	
+	<!--멤버가 구입한 총 가격  -->
+	<select id="totalOrderPriceByMemberNo" resultClass="int" parameterClass="int">
+		select 
+			nvl(sum(ORDER_FINAL_PRICE),0)
+		from 
+			KAKAO_ORDER
+		where 
+			MEMBER_NO = #value#
+		and 
+			order_cancel_yn = 'N'
+	</select>
+
+	<!--전체 주문 리스트  페이징, 검색, 정렬-->
+ 	<select id="getAllOrder" resultClass="order" parameterClass="criteria">
+		select 
+			order_no no,
+			memNo "member.no",
+			member_name "member.name",
+			order_status status,
+			order_cancel_yn cancelYn,
+			order_create_date createDate,
+			order_total_price totalPrice,
+			order_use_point usePoint,
+			order_final_price finalPrice,
+			order_nation nation,
+			order_name name,
+			order_phone phone,
+			order_postal_code postalCode,
+			order_address address,
+			order_detail_address detailAddress,
+			ORDER_INVOICE_NUMBER invoiceNumber
+		from 
+			(select
+				row_number() over(order by 
+			<dynamic>
+				<isEqual property="sort" compareValue="ALLNEW">
+					o.order_no desc
+				</isEqual>
+				<isEqual property="sort" compareValue="ALLOLD">
+					o.order_no asc
+				</isEqual>
+				<isEqual property="sort" compareValue="ibgm">
+					o.order_no desc
+				</isEqual>
+				<isEqual property="sort" compareValue="baejun">
+					o.order_no desc
+				</isEqual>
+				<isEqual property="sort" compareValue="baejung">
+					o.order_no desc
+				</isEqual>
+				<isEqual property="sort" compareValue="baewan">
+					o.order_no desc
+				</isEqual>
+			</dynamic>
+				)row_no, o.*, m.member_no memNo, m.*
+			 from
+			 	kakao_order o, kakao_member m
+			 where 
+			 	1 = 1
+			 and
+			 	o.member_no = m.member_no
+			 <dynamic>
+				<isEqual property="sort" compareValue="ibgm">
+					and o.order_status = '입금확인'
+				</isEqual>
+				<isEqual property="sort" compareValue="baejun">
+					and o.order_status = '배송준비중'
+				</isEqual>
+				<isEqual property="sort" compareValue="baejung">
+					and o.order_status = '배송중'
+				</isEqual>
+				<isEqual property="sort" compareValue="baewan">
+					and o.order_status = '배송완료'
+				</isEqual>
+				
+				<isNotEmpty property="option">
+					<isEqual property="option" compareValue="orderNum">
+						and o.order_no like '%' || #keyword# || '%'
+					</isEqual>
+					<isEqual property="option" compareValue="id">
+						and m.member_id like '%' || #keyword# || '%'
+					</isEqual>
+					<isEqual property="option" compareValue="name">
+						and m.member_name like '%' || #keyword# || '%'
+					</isEqual>
+				</isNotEmpty>
+			 </dynamic>
+			)
+			where 
+				row_no >= #beginIndex# 
+			and
+				row_no &lt;= #endIndex#
+			
+	</select> 
+	
+	<!--전체수량 조회, 검색  -->
+	<select id="getCountOrder" resultClass="int" parameterClass="criteria">
+		select count(*)
+		from kakao_order o, kakao_member m
+		where 1 = 1
+		and 
+			o.member_no = m.member_no
+			<dynamic>
+				<isNotEmpty property="option">
+					<isEqual property="option" compareValue="orderNum">
+						and o.order_no like '%' || #keyword# || '%'
+					</isEqual>
+					<isEqual property="option" compareValue="id">
+						and m.member_id like '%' || #keyword# || '%'
+					</isEqual>
+					<isEqual property="option" compareValue="name">
+						and m.member_name like '%' || #keyword# || '%'
+					</isEqual>
+				</isNotEmpty>
+			 </dynamic>
+	</select>
+	
+	<!--주문 상세페이지  -->
+	<select id="getOrderByNo" resultClass="order" parameterClass="int">
+		select 
+			o.order_no no,
+			m.member_no "member.no",
+			m.member_name "member.name",
+			o.order_status status,
+			o.order_cancel_yn cancelYn,
+			o.order_create_date createDate,
+			o.order_total_price totalPrice,
+			o.order_use_point usePoint,
+			o.order_final_price finalPrice,
+			o.order_nation nation,
+			o.order_name name,
+			o.order_phone phone,
+			o.order_postal_code postalCode,
+			o.order_address address,
+			o.order_detail_address detailAddress,
+			o.ORDER_INVOICE_NUMBER invoiceNumber
+		from 
+			kakao_order o, kakao_member m
+		where 
+			o.member_no = m.member_no
+		and 
+			o.order_no = #value#
+	</select>
+	
+	<!--업데이트  -->
+	
+	<update id="updateOrderByNo" parameterClass="order" >
+		update kakao_order
+		set
+			order_status = #status#,
+			order_cancel_yn = #cancelYn#,
+			order_total_price = #totalPrice#,
+			order_use_point = #usePoint#,
+			order_final_price = #finalPrice#,
+			order_nation = #nation#,
+			order_name = #name#,
+			order_phone = #phone#,
+			order_postal_code = #postalCode#,
+			order_address = #address#,
+			order_detail_address = #detailAddress#,
+			ORDER_INVOICE_NUMBER = #invoiceNumber#
+		where 
+			order_no = #no#
+	</update>
+	
+	<!--메인페이지 금일 주문건수 보기  -->
+	<select id="getOrderByToday" resultClass="order">
+		SELECT 
+			order_no no,
+			MEMBER_NAME "member.name",
+			MEMBER_ID "member.id",
+			ORDER_USE_POINT usePoint,
+			ORDER_FINAL_PRICE finalPrice
+		from 
+			(SELECT 
+				O.order_no,
+				M.MEMBER_NAME,
+				M.MEMBER_ID,
+				O.ORDER_USE_POINT,
+				O.ORDER_FINAL_PRICE,
+				ROW_NUMBER() over(order by o.order_no desc) sortNum
+			from KAKAO_ORDER O, KAKAO_MEMBER M
+			where to_char(O.ORDER_CREATE_DATE,'yyyyMMDD') = TO_CHAR(sysdate,'yyyyMMDD')
+			AND	 O.MEMBER_NO = M.MEMBER_NO)
+		where sortNum BETWEEN 1 and 7
+	</select>
+	
+	<select id="getOrderMainInfo" resultClass="main">
+		select 
+			COUNT(*) orderCount, 
+			nvl(sum(order_final_price),0) totalPrice
+		FROM
+			KAKAO_ORDER
+		where 
+			TO_CHAR(ORDER_CREATE_DATE,'yyyyMM') = TO_CHAR(sysdate,'yyyyMM')
+		and
+			order_cancel_yn = 'N'
+	</select>
+</sqlMap>

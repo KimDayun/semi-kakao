@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+		
+		<!-- 배너 -->
+		<select id="getAllBanners"  resultClass="Banner">
+			select
+				banner_no as no,
+				product_no as "product.no",
+				banner_title as title,
+				banner_sub_title as subtitle,
+				banner_display_yn as displayYn,
+				banner_priority as displayOrder,
+				banner_img as imgName
+			from kakao_banner
+			where banner_display_yn = 'Y'
+			order by displayOrder asc
+		</select>
+		
+		<!-- 신상품 -->
+		<select id="getNewProducts" parameterClass="Criteria" resultClass="Product">
+			select 
+				product_no as no,
+				product_name as name, 
+				product_price as price, 
+				product_info as info, 
+				cate_no as cateNo, 
+				product_img as imgName, 
+				product_stock as stock, 
+				product_global_yn as globalYn, 
+				product_soldout_yn as soldoutYn, 
+				product_create_date as createDate, 
+				product_character as character, 
+				<dynamic>
+					<isGreaterThan property="memberNo" compareValue="0">
+						(select count(*) from KAKAO_CART where MEMBER_NO = #memberNo# and PRODUCT_NO = A.product_no ) cnt,
+					</isGreaterThan>
+				</dynamic>
+				product_sell_yn as sellYn
+			from (select 
+						to_char(product_create_date,'yyyy-dd-mm HH:MM:SS') , product_no, product_name, product_price, PRODUCT_INFO, CATE_NO, PRODUCT_IMG, PRODUCT_STOCK, PRODUCT_GLOBAL_YN, PRODUCT_SOLDOUT_YN, PRODUCT_CREATE_DATE, PRODUCT_CHARACTER, PRODUCT_SELL_YN
+				  from 
+						 kakao_product
+				  order by 1 desc) A
+			where rownum &lt;= 8
+			and product_sell_yn = 'Y'
+			order by product_create_date desc
+		</select>
+	
+		<!-- 라이언 -->
+		<select id="getRyanProducts" parameterClass="Criteria" resultClass="Product">
+			select 
+				product_no as no,
+				product_name as name, 
+				product_price as price, 
+				product_info as info, 
+				cate_no as cateNo, 
+				product_img as imgName, 
+				product_stock as stock, 
+				product_global_yn as globalYn, 
+				product_soldout_yn as soldoutYn, 
+				product_create_date as createDate, 
+				product_character as character,
+				<dynamic>
+					<isGreaterThan property="memberNo" compareValue="0">
+						(select count(*) from KAKAO_CART where MEMBER_NO = #memberNo# and PRODUCT_NO = A.product_no ) cnt,
+					</isGreaterThan>
+				</dynamic> 
+				product_sell_yn as sellYn
+			from KAKAO_PRODUCT A
+			where PRODUCT_CHARACTER = 'ryan'
+			and rownum &lt;= 8
+		</select>
+		
+		<!-- 어피치 -->
+		<select id="getApeachProducts" parameterClass="Criteria" resultClass="Product">
+			select 
+				product_no as no,
+				product_name as name, 
+				product_price as price, 
+				product_info as info, 
+				cate_no as cateNo, 
+				product_img as imgName, 
+				product_stock as stock, 
+				product_global_yn as globalYn, 
+				product_soldout_yn as soldoutYn, 
+				product_create_date as createDate, 
+				product_character as character, 
+				<dynamic>
+					<isGreaterThan property="memberNo" compareValue="0">
+						(select count(*) from KAKAO_CART where MEMBER_NO = #memberNo# and PRODUCT_NO = A.product_no ) cnt,
+					</isGreaterThan>
+				</dynamic>
+				product_sell_yn as sellYn
+			from KAKAO_PRODUCT A
+			where PRODUCT_CHARACTER = 'apeach'
+			and rownum &lt;= 8
+		</select>
+		
+		<!-- 인기상품 -->
+		<select id="getLikeProducts" parameterClass="Criteria" resultClass="Product">
+			select no, name, price, info, cateNo, imgName, stock, globalYn, soldoutYn, createDate, character,  
+			<dynamic>
+				<isGreaterThan property="memberNo" compareValue="0">
+				(select count(*) from KAKAO_CART where MEMBER_NO = #memberNo# and PRODUCT_NO = X.no ) cnt,
+				</isGreaterThan>
+				sellYn
+			</dynamic>
+			from (
+				select 
+					P.product_no as no,
+					P.product_name as name, 
+					P.product_price as price, 
+					P.PRODUCT_INFO as info, 
+					P.CATE_NO as cateNo, 
+					P.PRODUCT_IMG imgName, 
+					P.PRODUCT_STOCK as stock,
+					P.PRODUCT_GLOBAL_YN as globalYn, 
+					P.PRODUCT_SOLDOUT_YN soldoutYn, 
+					P.PRODUCT_CREATE_DATE createDate, 
+					P.PRODUCT_CHARACTER character, 
+					P.PRODUCT_SELL_YN sellYn, 
+					likes
+				from KAKAO_PRODUCT P, (select product_no as no, count(*) as likes
+										from kakao_likes
+										group by product_no
+										order by likes desc
+										) L
+				where P.product_no = L.no
+				and P.product_sell_yn = 'Y'
+				order by likes desc) X
+			where
+				rownum &lt;= 8
+		</select>
+		
+		<select id="countCartsByMemberNo" parameterClass="int" resultClass="int">
+			select count(*)
+			from KAKAO_CART
+			where MEMBER_NO = #value#
+		</select>
+		
+</sqlMap>

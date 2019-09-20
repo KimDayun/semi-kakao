@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+
+<typeAlias alias="orderpro" type="kr.co.kakao.vo.OrderProducts"/>
+<typeAlias alias="main" type="kr.co.kakao.vo.AdminMain"/>
+
+	<!-- 주문번호에 해당하는 물건 조회 -->
+	<select id="getOrderProductByOrderNo" resultClass="orderpro" parameterClass="int">
+		select 
+			op.ORDER_PRODUCT_NO no, 
+			p.PRODUCT_NO "product.no", 
+			p.product_name "product.name", 
+			op.ORDER_PRODUCT_AMOUNT amount, 
+			o.ORDER_NO "order.no", 
+			op.ORDER_PRODUCT_CREATE_DATE createDate
+		from 
+			kakao_order o, kakao_order_products op, kakao_product p
+		where 
+			o.order_no = op.order_no
+		and
+			op.product_no = p.product_no
+		and
+			o.order_no = #value#
+	</select>
+	
+	<!--한달간 총 주문한 물건 건수  -->
+	<select id="getOrderProductTotalAmount" resultClass="int">
+		select
+			nvl(sum(op.ORDER_PRODUCT_AMOUNT),0) totalAmount
+		from 
+			KAKAO_ORDER_PRODUCTS op, kakao_order o
+		where
+			TO_CHAR(ORDER_product_CREATE_DATE,'yyyyMM') = TO_CHAR(sysdate,'yyyyMM')
+		AND
+			o.order_no = op.order_no
+		AND
+			o.ORDER_CANCEL_YN = 'N'
+	</select>
+	
+	<!--한달간 가장 많이 구매한 물건 이름  -->
+	<select id="getProductNameByMonthOfBest" resultClass="String">
+		select 
+			product_name
+		from 
+			kakao_product
+		where 
+			product_no in (
+							select 
+								product_no
+							from(
+									SELECT
+										PRODUCT_NO, rank() over(order by sum(order_product_amount) desc) ranking
+									from 
+										KAKAO_ORDER_PRODUCTS
+									group by 
+										PRODUCT_NO)
+									where 
+										ranking = 1)
+	</select>
+</sqlMap>

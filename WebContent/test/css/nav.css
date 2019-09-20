@@ -1,0 +1,103 @@
+
+html,body,nav div,nav span,nav applet,nav object,nav iframe,
+nav h1,nav h2,nav h3,nav h4,nav h5,nav h6,nav p,nav blockquote,nav pre,
+nav a,nav abbr,nav acronym,nav address,nav big,nav cite,nav code,
+nav del,nav dfn,nav em,nav img,nav ins,nav kbd,nav q,nav s,nav samp,
+nav small,nav strike,nav strong,nav sub,nav sup,nav tt,nav var,
+nav b,nav u,nav i,nav center,
+nav dl,nav dt,nav dd,nav ol,nav ul,nav li,
+nav fieldset,nav form,nav label,nav legend,
+nav table,nav caption,nav tbody,nav tfoot,nav thead,nav tr,nav th,nav td,
+nav article,nav aside,nav canvas,nav details,nav embed,
+nav figure,nav figcaption,nav footer,nav header,nav hgroup,
+nav menu,nav , nav output,nav ruby,nav section,nav summary,
+nav time, nav mark, nav audio, nav video {
+margin: 0;
+padding: 0;
+border: 0;
+font-size: 100%;
+list-style: none;
+text-decoration: none;
+color: #000;
+}
+
+/* HTML5 display-role reset for older browsers */
+nav article, nav aside, nav details, nav figcaption, nav figure,
+nav footer, nav header, nav hgroup,nav menu, nav, nav section {
+display: block;
+}
+nav ol, ul {
+list-style: none;
+}
+nav blockquote, q {
+quotes: none;
+}
+nav blockquote:before,nav blockquote:after,
+nav q:before,nav q:after {
+content: '';
+content: none;
+}
+nav table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+
+.wrap{margin: 0; padding: 0;}
+
+nav{width: 100%; height: 60px; position: relative; background: #fff; z-index: 11;}
+nav .inner-nav{width: 1080px; margin: 0 auto;}
+nav a:hover{text-decoration: none; color: #000;}
+nav .logo{display: inline-block; padding: 19px; float: left;}
+nav .navigation{width: 300px; display: inline-block; margin-left: 25px;}
+nav .navigation>ul{width:100%; height: 60px;}
+nav .navigation>ul>li{width: 33.333%; float: left; padding: 22px 0; list-style: none; text-align: center; }
+nav .navigation>ul>li>a{position: relative; font-size: 16px;}
+nav .navigation>ul>li>a:hover{color: #111; font-weight: bold;}
+nav .navigation>ul>.hover:hover>a::after{content: ""; display: block; position: absolute; bottom: -19px;font-weight: bold; width: 100%; left: 0; transition: ease .3s; height: 3px; background: #000;}
+nav .sub-hover .nav-sub{width: 100%; height: 0; overflow: hidden; position: absolute; top: 60px; left: 0; } 
+nav .navigation>ul>.hover:hover .nav-sub{border-top: 1px solid #ccc;}
+nav .sub-hover:hover .nav-sub{display: block; width: 100%; height: 590px; background: #fff; position: absolute; top: 60px; left: 0; transition: .6s ease; border-bottom: 1px solid #ccc; box-shadow: 5px 5px 5px #ccc;}
+
+nav .sub-hover .nav-sub .second-menu {width: 1080px; margin: 0 auto; position: relative;}
+nav .sub-hover .nav-sub .second-menu ul li{width: 200px; padding: 10px 19px; float: inherit; text-align: left; box-sizing: border-box}
+nav .sub-hover .nav-sub .second-menu h2{font-size: 30px; padding: 27px 19px; text-align: left;}
+
+nav .sub-hover .nav-sub .second-menu .third-menu ul{display:none; position: absolute; top: 84px; left: 180px; height: 590px; }
+nav .sub-hover .nav-sub .second-menu .third-menu li{padding: 10px 0; text-align: left; text-overflow: ellipsis; overflow: hidden; box-sizing: border-box; }
+nav .sub-hover .nav-sub .second-menu .second-hover:hover>a{font-weight: bold; color: #333;}
+nav .sub-hover .nav-sub .second-menu .third-menu li a{display: none; font-size: 16px;}
+nav .sub-hover .nav-sub .second-menu .second-hover>a{color: #7d7d7d; font-size: 16px;}
+nav .sub-hover .nav-sub .second-menu .second-hover li a{color: #7d7d7d; }
+nav .sub-hover .nav-sub .second-menu .second-hover li a:hover{color: #333; }
+nav .sub-hover .nav-sub .second-menu .second-hover:hover li a{display: block; }
+nav .sub-hover .nav-sub .second-menu .second-hover li a:hover{font-weight: bold;}
+nav .sub-hover .nav-sub .second-menu .second-hover:hover ul{display: block;}
+nav .sub-hover .nav-sub .second-menu .second-hover:hover li a{display: block;}
+.img{display: none;}
+nav .sub-hover .nav-sub .second-menu .second-hover li a:hover .img{width: 200px; position: absolute; bottom: 85px; left: 210px; display: block;}
+
+
+
+nav .icon{width: 180px; display: inline-block; float: right;}
+nav .icon ul{width:100%; height: 100%; }
+nav .icon li{float: left; height: 60px; padding: 22px 20px; list-style: none; text-align: center;}
+
+
+.character{width: 490px; height: 590px; position: absolute; top: 0; right: 0px; padding: 19px 0; border-left: 1px solid #ccc;}
+nav .sub-hover .nav-sub .character li{width: 50% !important; height: auto; float: left !important; display: inline-block; padding: 10px 0 10px 25px !important;}
+.character .char-detail img{ float: left;}
+.character span{float: left; font-size: 13px; letter-spacing: -1px; margin: 10px 0 0 15px; color: #898989;}
+.character li strong{font-size: 16px; line-height: 45px; padding-left: 88px; display: block; color: #1e1e1e;}
+nav .sub-hover .nav-sub .second-menu .title-li{width: 100% !important; display: block; font-size: 30px;
+padding: 27px 19px;}
+
+.icon .member-detail {position: relative; display: none; }
+    
+.icon .member-detail ul{width: 140px !important; height: 210px !important; position: absolute; top: 0px; left: -65px; border: 1px solid #333; background: #fff; z-index:11;}
+.icon .member-detail li {width: 100%; height: auto; padding: 0; border-bottom: 1px solid #ddd; box-sizing: border-box;}
+.icon .member-detail li:last-child{border: none;}
+.icon .member-detail li a {width: 100%; display: block; height: 100%; padding: 10px 0; color: #555; font-size: 15px; }
+.icon .member-detail li a:hover{font-weight: bold; color: #111;}
+.member:hover .member-detail{display: block;}
+
+

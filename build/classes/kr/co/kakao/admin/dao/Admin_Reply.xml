@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+	<typeAlias alias="qna" type="kr.co.kakao.vo.Qna"/>
+	<typeAlias alias="reply" type="kr.co.kakao.vo.QnaReply"/>
+	
+	<insert id="addReply" parameterClass="reply">
+		insert into kakao_qna_reply
+			(QNA_REPLY_NO, QNA_NO, QNA_REPLY_CONTENTS)
+		values
+			(QUESTION_SEQ.nextval, #qna.no#, #contents#)
+	</insert>
+	
+	<select id="getReplyByNo" parameterClass="int" resultClass="reply">
+		select 
+			qna_reply_no no,
+			qna_no "qna.no",
+			qna_reply_contents contents,
+			qna_reply_create_date createDate
+		from
+			kakao_qna_reply
+		where
+			qna_no = #value#
+	</select>
+</sqlMap>

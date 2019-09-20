@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+
+
+		<typeAlias alias="Criteria" type="kr.co.kakao.vo.Criteria"/>
+
+		
+	<!-- 상품조회 -->
+	<select id="getProductsBySearch" parameterClass="Criteria" resultClass="Product">
+	select *
+	from(
+		select 
+			product_no			as no,
+			product_name		as name,
+			product_price		as price,
+			product_info		as info,
+			cate_no				as cateNo,
+			product_img			as imgName,
+			product_stock		as stock,
+			product_global_yn	as globalYn,
+			product_soldout_yn	as soldoutYn,
+			product_create_date	as createDate,
+			product_character	as character,
+			product_sell_yn		as sellYn,
+			row_number() over (order by 
+			<dynamic>
+				<isEqual property="sort" compareValue="신상품순">
+					product_no desc
+				</isEqual>
+				<isEqual property="sort" compareValue="낮은가격순">
+					product_price asc
+				</isEqual>
+				<isEqual property="sort" compareValue="높은가격순">
+					product_price desc
+				</isEqual>
+			</dynamic>
+		
+		) as rn
+		from kakao_product A
+		where product_name like '%' || #keyword# || '%'
+		)
+		where rn >= #beginIndex# and rn &lt;= #endIndex#
+	</select>
+	
+	<!-- 개수 조회 -->
+	<select id="getProductCountBySearch" parameterClass="Criteria" resultClass="int">
+		select count(*)
+		from kakao_product
+		where product_name like '%' || #keyword# || '%'
+	</select>
+	
+</sqlMap>

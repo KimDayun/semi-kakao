@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+
+	<typeAlias alias="Cart" type="kr.co.kakao.vo.Cart"/>
+	<typeAlias alias="Likes" type="kr.co.kakao.vo.Likes"/>
+		
+	<!-- 번호로 상품조회 -->
+	<select id="getDetailProductsByNo" resultClass="Product" parameterClass="int">
+		select 
+			product_no as no,
+			product_name as name, 
+			product_price as price, 
+			product_info as info, 
+			cate_no as cateNo, 
+			product_img as imgName, 
+			product_stock as stock, 
+			product_global_yn as globalYn, 
+			product_soldout_yn as soldoutYn, 
+			product_create_date as createDate, 
+			product_character as character, 
+			product_sell_yn as sellYn
+		from
+			kakao_product
+		where
+			product_no = #value#
+	</select>
+	
+	<!-- 카테고리 번호로 카테고리 이름 조회  -->
+	<select id="getCateNameByNo" resultClass="Category" parameterClass="int">
+		select 
+			cate_name as name, 
+			cate_no as no
+		from 
+			kakao_cate
+		where 
+			cate_no = (
+						select cate_no 
+						from kakao_product 
+						where product_no = #value#
+						)
+	</select>
+	
+	<!-- 상품번호로 조회 된 카테고리 번호로 상품 조회 -->
+	<select id="getProductsByCateNo" parameterClass="int" resultClass="Product">
+		select no, name, price, info, cateNo, imgName, stock globalYn, soldoutYn, createDate, character, sellYn
+		from
+			(select
+				product_no			as no,
+				product_name		as name,
+				product_price		as price,
+				product_info		as info,
+				cate_no				as cateNo,
+				product_img			as imgName,
+				product_stock		as stock,
+				product_global_yn	as globalYn,
+				product_soldout_yn	as soldoutYn,
+				product_create_date	as createDate,
+				product_character	as character,
+				product_sell_yn		as sellYn
+			from
+				kakao_product
+			where
+				cate_no = (select CATE_NO
+							from KAKAO_PRODUCT
+							where PRODUCT_NO = #value#
+							)	
+			and 
+				product_no &lt;> #value#)
+		where
+			rownum &lt;= 8
+	</select>
+	
+	<!--장바구니에 넣기 -->
+	<insert id="insertProductByCart" parameterClass="Cart">
+		insert into kakao_cart
+		(cart_no, product_no, member_no, cart_product_amount)
+		values
+		(cart_seq.nextval, #product.no#, #member.no#, #productAmount#)
+	</insert>
+	
+	<!-- 찜하기 -->
+	<insert id="insertProductByLike" parameterClass="Likes">
+		insert into kakao_likes
+		(likes_no, member_no, product_no)
+		values
+		(likes_seq.nextval, #member.no#, #product.no#)
+	</insert>
+	
+	<!-- 카트 상태변경 -->
+	<select id="changeCartSts" parameterClass="map" resultClass="Cart">
+		select 
+			CART_NO as no,
+			PRODUCT_NO as "product.no",
+			MEMBER_NO as "member.no"
+		from kakao_cart
+		where member_no = #memberNo#
+		and product_no = #productNo#
+	</select>
+	
+	<!-- 찜 상태변경 -->
+	<select id="changeLikeSts" parameterClass="map" resultClass="Likes">
+		select 
+			LIKES_NO as no,
+			PRODUCT_NO as "product.no",
+			MEMBER_NO as "member.no"
+		from kakao_likes
+		where member_no = #memberNo#
+		and product_no = #productNo#
+	</select>
+	
+	<!-- 찜하기 삭제 -->
+	<delete id="deleteLike" parameterClass="Likes">
+		delete from kakao_likes
+		where product_no = #product.no#
+		and member_no = #member.no#
+	</delete>
+</sqlMap>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+
+		<typeAlias alias="Category" type="kr.co.kakao.vo.Category"/>
+	
+	<!-- 번호로 카테고리 조회 -->
+	<select id="getCategoryByNo" parameterClass="int" resultClass="Category">
+		select
+			C.cate_no			as no,
+			C.cate_name			as name,
+			nvl(C.cat_parent_no, 0)		as parentNo,
+			C.cate_eng_name		as engName
+		from 
+			kakao_cate P,
+			kakao_cate C
+		where
+			P.cate_no = C.cate_no
+		and
+			P.cate_no = #value#
+	</select>
+	
+	<!-- 소분류의 번호로 부모카테고리 번호 조회 -->
+	<select id="getParentNoByNo" parameterClass="int" resultClass="int">
+		select nvl(CAT_PARENT_NO, cate_no) as parentNo
+		from kakao_cate
+		where cate_no = #value#
+	</select>
+
+	<!-- 상품조회 -->
+	<select id="getProducts" parameterClass="Criteria" resultClass="Product">
+	select *
+	from(
+		select 
+			product_no			as no,
+			product_name		as name,
+			product_price		as price,
+			product_info		as info,
+			cate_no				as cateNo,
+			product_img			as imgName,
+			product_stock		as stock,
+			product_global_yn	as globalYn,
+			product_soldout_yn	as soldoutYn,
+			product_create_date	as createDate,
+			product_character	as character,
+			product_sell_yn		as sellYn,
+			<dynamic>
+				<isGreaterThan property="memberNo" compareValue="0">
+					(select count(*) from KAKAO_CART where MEMBER_NO = #memberNo# and PRODUCT_NO = A.product_no ) cnt,
+				</isGreaterThan>                                          
+			</dynamic>
+			row_number() over (order by 
+			<dynamic>
+				<isEqual property="sort" compareValue="신상품순">
+					product_no desc
+				</isEqual>
+				<isEqual property="sort" compareValue="낮은가격순">
+					product_price asc
+				</isEqual>
+				<isEqual property="sort" compareValue="높은가격순">
+					product_price desc
+				</isEqual>
+			</dynamic>
+			
+		) as rn
+		from kakao_product A
+		where 1 = 1
+		<dynamic>
+			<isEqual property="type" compareValue="B">
+				and cate_no in (select cate_no
+							from kakao_cate
+							where cat_parent_no = #categoryNo#)
+			</isEqual>
+			<isEqual property="type" compareValue="S">
+				and cate_no = #categoryNo#
+			</isEqual>
+			<isNotNull property="global">
+				<isEqual property="global" compareValue="Y">
+					and product_global_yn = 'Y'
+				</isEqual>
+			</isNotNull>
+			<isNotEmpty property="character">
+				and product_character = #character#
+			</isNotEmpty>
+		</dynamic>
+		)
+	where rn >= #beginIndex# and rn &lt;= #endIndex#		<!-- 가상의테이블 이용해서 페이지 -->
+	</select>
+	
+	<!-- 개수 조회 -->
+	<select id="getProductCount" parameterClass="Criteria" resultClass="int">
+		select count(*)
+		from kakao_product
+		where 1 = 1
+		<dynamic>
+			<isEqual property="type" compareValue="B">
+				and cate_no in (select cate_no
+							from kakao_cate
+							where cat_parent_no = #categoryNo#)
+			</isEqual>
+			<isEqual property="type" compareValue="S">
+				and cate_no = #categoryNo#
+			</isEqual>
+			<isNotNull property="global">
+				<isEqual property="global" compareValue="Y">
+					and product_global_yn = 'Y'
+				</isEqual>
+			</isNotNull>
+			<isNotEmpty property="character">
+				and product_character = #character#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!-- 카테고리 조회 -->
+	<select id="getCategories" parameterClass="Criteria" resultClass="Category">
+		select
+			C.cate_no			as no,
+			C.cate_name			as name,
+			nvl(C.cat_parent_no,0)		as parentNo,
+			C.cate_eng_name		as engName
+		from 
+			kakao_cate P,
+			kakao_cate C
+		where 1 = 1
+		<dynamic>
+			<isEqual property="type" compareValue="B">
+				and P.cate_no = C.cate_no
+		 		and C.cat_parent_no = #categoryNo#
+			</isEqual>
+			<isEqual property="type" compareValue="S">
+				and P.cate_no = C.cate_no
+				and C.cat_parent_no = (select cat_parent_no
+									from kakao_cate
+									where cate_no = #categoryNo#)
+			</isEqual>
+		</dynamic>
+	</select>
+	
+	<!-- 장바구니에 담기 -->
+	<insert id="addCart" parameterClass="kr.co.kakao.vo.Cart">
+		insert into kakao_cart (
+			cart_no,
+			product_no,			
+			member_no,			
+			cart_product_amount)
+		values (cart_seq.nextval, #product.no#, #member.no#, #productAmount#)
+	</insert>
+	
+	<select id="getCartCounts" parameterClass="kr.co.kakao.vo.Cart" resultClass="int">
+		select count(*)
+		from kakao_cart
+		where product_no = #product.no# 			
+		and member_no = #member.no#	
+	</select>
+	
+	<update id="updateCartCount" parameterClass="kr.co.kakao.vo.Cart">
+		update kakao_cart
+		set
+			cart_product_amount = cart_product_amount + #productAmount#
+		where product_no = #product.no# 			
+		and member_no = #member.no#	
+	</update>
+	
+</sqlMap>

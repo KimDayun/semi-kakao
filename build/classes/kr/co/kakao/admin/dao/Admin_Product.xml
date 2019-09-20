@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+
+	<typeAlias alias="AdminProduct" type="kr.co.kakao.vo.AdminProduct"/>
+	<typeAlias alias="Product" type="kr.co.kakao.vo.Product"/>
+	
+	<!-- 상품리스트 Count 가져오기 -->
+	<select id="countAllList" resultClass="int" parameterClass="criteria">
+		select count(*)
+		from
+			kakao_product A,
+			kakao_cate B,
+			kakao_cate C
+		where
+			A.CATE_NO = C.CATE_NO
+		and C.CAT_PARENT_NO = B.CATE_NO
+		<dynamic>
+			<isNotNull property="option">
+				<isEqual property="option" compareValue="ProTitle">
+					and product_name like '%' || #keyword# || '%'
+				</isEqual>
+				<isEqual property="option" compareValue="ProContent">
+					and product_info like '%' || #keyword# || '%'
+				</isEqual>
+			</isNotNull>
+		</dynamic>	
+	</select>
+	
+	
+	<!--상품리스트 페이징-->
+	<select id="getProductPagingList" parameterClass="criteria" resultClass="AdminProduct">
+	select 
+		PRODUCT_NO as no, 
+		CATE_NAME as cateName, 
+		sub_cate_name as subCateName, 
+		PRODUCT_CHARACTER as character,
+		PRODUCT_NAME as name, 
+		PRODUCT_PRICE as price, 
+		PRODUCT_STOCK as stock, 
+		PRODUCT_GLOBAL_YN as globalYn, 
+		PRODUCT_SELL_YN as sellYn, 
+		PRODUCT_CREATE_DATE as createDate
+	from (select row_number() over(order by	
+		<dynamic>
+				<isEqual property="sort" compareValue="ALLNEW">
+					A.product_no desc
+				</isEqual>	
+				<isEqual property="sort" compareValue="ALLOLD">
+					A.product_no asc
+				</isEqual>
+		</dynamic>
+		)  row_no, A.product_no, B.cate_name, C.cate_name sub_cate_name, A.product_character, A.product_name, A.product_price, A.product_stock, A.product_global_yn, A.product_sell_yn, A.product_create_date
+		from
+			kakao_product A,
+			kakao_cate B,
+			kakao_cate C
+		where
+			A.CATE_NO = C.CATE_NO
+		and C.CAT_PARENT_NO = B.CATE_NO
+		<dynamic>
+			<isNotEmpty property="option">
+					<isEqual property="option" compareValue="ProTitle">
+						and product_name like '%' || #keyword# || '%'
+					</isEqual>
+					<isEqual property="option" compareValue="ProContent">
+						and product_info like '%' || #keyword# || '%'
+					</isEqual>
+			</isNotEmpty>
+		</dynamic>
+		)
+		where row_no >= #beginIndex# and row_no &lt;= #endIndex#				
+		</select>
+	
+	<!-- 모든 리스트(소분류,대분류 추가) 출력 -->
+	<select id="getProductList" resultClass="AdminProduct">
+	select 
+		A.PRODUCT_NO as no, 
+		B.CATE_NAME as cateName, 
+		C.CATE_NAME as subCateName, 
+		A.PRODUCT_CHARACTER as character,
+		A.PRODUCT_NAME as name, 
+		A.PRODUCT_PRICE as price, 
+		A.PRODUCT_STOCK as stock, 
+		A.PRODUCT_GLOBAL_YN as globalYn, 
+		A.PRODUCT_SELL_YN as sellYn, 
+		A.PRODUCT_CREATE_DATE as createDate
+	from 
+		kakao_product A,
+		kakao_cate B,
+		kakao_cate C
+	where 
+		A.CATE_NO = C.CATE_NO
+		and C.CAT_PARENT_NO = B.CATE_NO
+	</select>
+	
+	<!-- 상품추가 -->
+	<insert id="addProduct" parameterClass="Product">
+		insert into kakao_product
+		(product_no, product_name, product_price, product_info, cate_no, product_img, product_stock, product_global_yn,
+		 product_soldout_yn, product_character, product_sell_yn)
+		values
+		(product_seq.nextval, #name#, #price#, #info#, #cateNo#, #imgName#, #stock#, #globalYn#, #soldoutYn#, #character#, #sellYn#)
+	</insert>
+	
+	<!-- 모든 상품 출력 -->
+	<select id="getProductAll" resultClass="Product">
+		select
+			product_no      	as no,
+			product_name		as name,
+			product_price		as price,
+			product_info		as info,
+			cate_no				as cateNo,
+			product_img			as imgName,
+			product_stock		as stock,
+			product_global_yn	as globalYn,
+			product_soldout_yn	as soldoutYn,
+			product_create_date	createDate,
+			product_character	character
+		from
+			kakao_product
+	</select>
+	
+	<!-- 디테일 정보 출력 -->
+	<select id="getProductByNo" resultClass="AdminProduct" parameterClass="int">
+		select 
+		A.CATE_NO    as catNo,
+		A.PRODUCT_NO as no, 
+		B.CATE_NAME as cateName, 
+		C.CATE_NAME as subCateName, 
+		A.PRODUCT_CHARACTER as character,
+		A.PRODUCT_NAME as name, 
+		A.PRODUCT_IMG as imgName,
+		A.PRODUCT_PRICE as price, 
+		A.PRODUCT_STOCK as stock, 
+		A.PRODUCT_INFO as info,
+		A.PRODUCT_GLOBAL_YN as globalYn, 
+		A.PRODUCT_SELL_YN as sellYn,
+		A.PRODUCT_SOLDOUT_YN as soldoutYn
+	from 
+		kakao_product A,
+		kakao_cate B,
+		kakao_cate C
+	where 
+		A.CATE_NO = C.CATE_NO
+		and C.CAT_PARENT_NO = B.CATE_NO
+		and A.PRODUCT_NO = #value#
+		
+	</select> 
+	
+	<!-- 상품관리 업데이트 -->
+	<update id="updateProductByNo" parameterClass="AdminProduct">
+		update 
+			kakao_product
+		set
+			cate_no = #catNo#,
+			PRODUCT_CHARACTER = #character#,
+			PRODUCT_NAME = #name#,
+			PRODUCT_IMG = #imgName#,
+			PRODUCT_PRICE = #price#,
+			PRODUCT_STOCK =  #stock#,
+			PRODUCT_INFO = #info#,
+			PRODUCT_GLOBAL_YN = #globalYn#,
+			PRODUCT_SELL_YN =  #sellYn#,
+			PRODUCT_SOLDOUT_YN = #soldoutYn#
+		where
+			PRODUCT_NO = #no#
+	</update>
+	
+	
+	
+</sqlMap>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+
+<typeAlias alias="member" type="kr.co.kakao.vo.Member"/>
+
+<!--모든 회원 조회하기  -->
+<select id="getMemberAll" resultClass="member">
+	select	member_no as no,
+				member_id as id,
+				member_pwd as pwd,
+				member_name as name,
+				member_phone as phone,
+				member_email as email,
+				member_point as point,
+				member_address as address,
+				member_used_yn as usedYn,
+				member_create_date as createDate,
+				member_birth as birth
+		from kakao_member
+</select>
+
+<!--회원번호로 아이디 조회하기  -->
+<select id="getMemberByNo" parameterClass="int" resultClass="member">
+		select	member_no as no,
+				member_id as id,
+				member_pwd as pwd,
+				member_name as name,
+				member_phone as phone,
+				member_email as email,
+				member_point as point,
+				member_address as address,
+				member_used_yn as usedYn,
+				member_create_date as createDate,
+				member_birth as birth
+		from kakao_member
+		where member_no = #value#
+	</select>
+	
+<!--총 회원수 조회  -->
+<select id="getTotalMember" resultClass="int">
+	select count(*)
+	from kakao_member
+</select>
+
+<!-- 페이징 처리된 모든 회원들 -->
+	<select id="getAllMembersRange" resultClass="member" parameterClass="map">
+		select 
+			member_no no, 
+			member_id id, 
+			member_pwd pwd, 
+			member_name name, 
+			member_phone phone, 
+			member_email email, 
+			member_point point, 
+			member_address address, 
+			member_used_yn usedYn, 
+			member_create_date createDate, 
+			member_birth birth
+		from	
+			(select ROW_NUMBER() over(order by member_no) row_no, member_no, member_id, member_pwd, member_name, member_phone, member_email, member_point, member_address, member_used_yn, member_create_date, member_birth
+			from KAKAO_MEMBER)
+		where 
+			row_no >= #begin#
+		and 
+			row_no &lt; #end#
+</select>
+
+<!--회원정보 변경  -->
+	<update id="updateMemberByNo" parameterClass="member">
+		update kakao_member
+		set
+			member_id = #id#, 
+			member_pwd = #pwd#, 
+			member_name = #name#, 
+			member_phone = #phone#, 
+			member_email = #email#, 
+			member_point = #point#, 
+			member_address = #address#, 
+			member_used_yn = #usedYn#, 
+			member_birth = #birth#
+		where
+			member_no = #no#
+	</update>
+</sqlMap>

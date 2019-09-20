@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+
+	<typeAlias alias="cart" type="kr.co.kakao.vo.Cart"/>
+	<typeAlias alias="order" type="kr.co.kakao.vo.Order"/>
+	<typeAlias alias="orderProduct" type="kr.co.kakao.vo.OrderProducts"/>
+	<typeAlias alias="product" type="kr.co.kakao.vo.Product"/>
+	
+	
+	<select id="getOrderSeq" resultClass="int">
+		select order_seq.nextval from dual
+	</select>
+	
+	<insert id="insertOrder" parameterClass="order">
+		insert into kakao_order(order_no, member_no, order_total_price, order_use_point, order_final_price, 
+			order_nation, order_name, order_phone, order_postal_code, order_address, order_detail_address)
+		values(#no#, #member.no#, #totalPrice#, #usePoint#, #finalPrice#, #nation#, #name#, #phone#, #postalCode#, #address#, #detailAddress#)
+	</insert>
+	
+	<insert id="insertOrderProduct" parameterClass="orderProduct">
+		insert into kakao_order_products(order_product_no, product_no, order_product_amount, order_no)
+		values(orderproduct_seq.nextval, #product.no#, #amount#, #order.no#)
+	</insert>
+	
+	<select id="selectCartsByMemberNo" parameterClass="int" resultClass="cart">
+		select 	C.cart_no as no,
+				C.member_no as "member.no", 
+				C.cart_product_amount as productAmount,
+				C.cart_create_date as createDate,
+				P.product_no as "product.no",
+				P.product_name as "product.name",
+				P.product_price as "product.price",
+				P.product_info as "product.info",
+				P.cate_no as "product.cateNo",
+				P.product_img as "product.imgName",
+				P.product_stock as "product.stock",
+				P.product_global_yn as "product.globalYn",
+				P.product_soldout_yn as "product.soldoutYn",
+				P.product_create_date as "product.createDate",
+				P.product_character as "product.character",
+				P.product_sell_yn as "product.sellYn"
+		from kakao_cart C, kakao_product P
+		where C.product_no = P.product_no
+		and C.member_no = #value#
+	</select>
+	
+	<update id="updateAmountByProductNo" parameterClass="cart">
+		update kakao_cart
+		set cart_product_amount = #productAmount#
+		where product_no = #product.no#
+		and member_no = #member.no#
+	</update>
+	
+	<delete id="deleteCartByCartNo" parameterClass="int">
+		delete from kakao_cart
+		where cart_no = #value#
+	</delete>
+	
+	<insert id="insertPoint" parameterClass="pointHistory">
+		insert into kakao_point_history(point_history_no, order_no, member_no, point_history_change_point)
+		values(pointhistory_seq.nextval, #order.no#, #member.no#, #changePoint#)
+	</insert>
+	
+	<update id="updatePoint" parameterClass="map">
+		update kakao_member
+		set member_point = #changePoint#
+		where member_no = #memberNo#
+	</update>
+	
+	<update id="updateProductStock" parameterClass="cart">
+		update kakao_product
+		set product_stock = (3000 - #productAmount#)
+		where product_no = #product.no#
+	</update>
+	
+	<select id="selectProductByProductNo" parameterClass="int" resultClass="product">
+		select 	product_no as no,
+				product_name as name, 
+				product_price as price, 
+				product_info as info, 
+				cate_no as cateNo, 
+				product_img as imgName, 
+				product_stock as stock, 
+				product_global_yn as globalYn, 
+				product_soldout_yn as soldoutYn, 
+				product_create_date as createDate, 
+				product_character as character, 
+				product_sell_yn as sellYn
+		from kakao_product
+		where product_no = #value#
+	</select>
+</sqlMap>

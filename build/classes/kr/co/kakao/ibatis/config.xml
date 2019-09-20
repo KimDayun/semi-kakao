@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+
+
+	<typeAlias alias="Banner" type="kr.co.kakao.vo.Banner"/>
+	<typeAlias alias="Product" type="kr.co.kakao.vo.Product"/>
+		
+		
+	<!-- 
+		Connection 연결을 위한 설정
+	 -->
+	<transactionManager type="JDBC">
+		<dataSource type="SIMPLE">
+			<property name="JDBC.Driver" value="oracle.jdbc.OracleDriver"/>
+			<property name="JDBC.ConnectionURL" value="jdbc:oracle:thin:@localhost:1521:xe"/>
+			<property name="JDBC.Username" value="kakao"/>
+			<property name="JDBC.Password" value="zxcv1234"/>
+		</dataSource>
+	</transactionManager>
+	
+	<!-- 
+		SQL이 정의된 xml 파일의 이름 설정
+		<sqlMap resource="패키지명부터 xml경로." />
+	 -->
+	 
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Main.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_OrderProduct.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Reply.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Qna.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Banner.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Order.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Notice.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Product.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Member.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Store.xml"/>
+	 <sqlMap resource="kr/co/kakao/admin/dao/Admin_Cate.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/store.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/member.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/notice.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/main.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/category.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/mypage.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/cart.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/order.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/detail.xml"/>
+	 <sqlMap resource="kr/co/kakao/dao/search.xml"/>
+</sqlMapConfig>

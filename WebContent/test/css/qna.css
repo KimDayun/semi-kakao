@@ -1,0 +1,17 @@
+
+.qna_title{padding: 55px 0 78px; border-bottom: 1px solid #000; font-size: 30px; line-height: 31px; color: #222; font-weight: normal;}
+
+.input{background: #ccc;}
+.input-box{padding-left: 0; padding: 0 25px;}
+.input-box h4{margin: 42px 0 20px; font-size: 20px; color: #1e1e1e; font-weight: normal;}
+.input-box div{padding: 0;}
+form .input-box .input-left{padding-left: 15px;}
+form label{margin-bottom: 15px; font-size: 16px; line-height: 17px; color: #666; font-weight: 500;}
+.form-control{ padding: 0 19px; border: 1px solid #d2d2d2; background-color: #f9f9f9;}
+.box-margin{ margin-top: 30px;}
+.sec-box-margin{margin-top: 30px;}
+.file{margin: 10px 0 30px;}
+.border-line{border-bottom: 1px solid #ccc;}
+.cancle{width: 49%; height: 60px;}
+.add{width: 49%; height: 60px; float: right;}
+textarea.form-control {height: auto; padding: 15px;}

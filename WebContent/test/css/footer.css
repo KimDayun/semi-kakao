@@ -1,0 +1,9 @@
+@import "utf-8";
+
+footer {background: #2e2e2e; color: #c9c9c9; padding: 25px 0 60px; }
+footer .container small span{display: block; font-size: 13px;}
+footer .container .info_service{margin: 15px 0 30px;}
+footer .info_service a{color: #c9c9c9 !important; padding-right: 25px; font-size: 16px;}
+footer .link_mailto {color: #c9c9c9 !important;}
+footer .txt_corp{margin: 35px 0 0; font-size: 13px;}
+footer .txt_corp a{color: #c9c9c9 !important;}

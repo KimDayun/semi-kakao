@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+	
+	<!-- 주문 정보 : 배송중인 개수 찾는 쿼리문 -->
+	<select id="getDeliveryOrderCount" parameterClass="int" resultClass="int"> 
+		
+		select 
+			count(*)
+		from 
+			kakao_order
+		where 
+			member_no =#value#
+			and order_status = '배송중'
+			
+	</select>
+	
+	 <!-- 주문 정보 : 주문 취소중인 개수 찾는 쿼리문 -->
+	<select id="getCancelOrderCount" parameterClass="int" resultClass="int">
+		
+		select 
+			count(*)
+		from 
+			KAKAO_ORDER
+		where 
+			MEMBER_NO = #value#
+			and ORDER_CANCEL_YN = 'Y'
+	</select>
+	
+	
+	<!-- 주문 정보 : 주문한 상품의 정보 조회하기  -->
+	<select id="getOrderInfoByOrderNo" parameterClass="int" resultClass="kr.co.kakao.vo.OrderInfo">
+
+			select
+						B.ORDER_NO				orderNo,
+						A.PRODUCT_IMG			proImg,
+						A.PRODUCT_NAME			proName,
+						A.PRODUCT_PRICE 		proPrice,
+						A.PRODUCT_NO			proNo,
+						B.ORDER_STATUS			orderStatus,
+						B.ORDER_CREATE_DATE		orderDate,
+						B.ORDER_TOTAL_PRICE		finalPrice,
+						C.ORDER_PRODUCT_AMOUNT	orderAmount
+			from		KAKAO_PRODUCT A, KAKAO_ORDER B, KAKAO_ORDER_PRODUCTS C
+			where		B.MEMBER_NO=	#VALUE#
+						AND B.ORDER_NO=C.ORDER_NO
+						AND C.PRODUCT_NO=A.PRODUCT_NO
+						
+	</select>
+	
+	 <!-- 주문 정보 : 주문한 상품의 정보 조회하기 
+	<select id="getOrderInfoByOrderNo" parameterClass="int" resultClass="kr.co.kakao.vo.OrderInfo">
+		
+		SELECT 
+			X.ORDER_NO				orderNo,
+			X.PRODUCT_IMG			proImg,
+			X.PRODUCT_NAME			proName,
+			X.PRODUCT_PRICE 		proPrice,
+			X.PRODUCT_NO			proNo,
+			X.ORDER_STATUS			orderStatus,
+			X.ORDER_CREATE_DATE		orderDate,
+			X.ORDER_TOTAL_PRICE		finalPrice,
+			(SELECT COUNT(*) FROM KAKAO_ORDER_PRODUCTS WHERE ORDER_NO = X.ORDER_NO)	orderAmount
+		FROM (
+			select
+						B.ORDER_NO,
+						A.PRODUCT_IMG,
+						A.PRODUCT_NAME,
+						A.PRODUCT_PRICE ,
+						A.PRODUCT_NO,
+						B.ORDER_STATUS,
+						B.ORDER_CREATE_DATE,
+						B.ORDER_TOTAL_PRICE,
+						C.ORDER_PRODUCT_AMOUNT,
+						ROW_NUMBER() OVER (PARTITION BY b.ORDER_NO ORDER BY B.ORDER_NO DESC) RN
+						
+						
+				from 
+						KAKAO_PRODUCT A, KAKAO_ORDER B, KAKAO_ORDER_PRODUCTS C
+				where
+						B.MEMBER_NO=#value#
+						AND B.ORDER_NO=C.ORDER_NO
+						AND C.PRODUCT_NO=A.PRODUCT_NO) X
+		WHERE RN = 1	
+	</select>		-->
+	
+	<select id="getOrderInfo" resultClass="kr.co.kakao.vo.Order">
+	select 
+			A.order_no				no,
+			A.order_create_date		createDate,
+			A.order_status			status
+	
+	from
+			kakao_order A
+	</select>
+	
+	
+	
+	<!-- 주문 취소하기 -->
+	<delete id="deleteorderproductByorderNo" parameterClass="int" >
+		DELETE 
+		FROM 
+				KAKAO_ORDER_PRODUCTS
+		WHERE 
+				ORDER_NO = #value#
+	</delete>
+	
+	<delete id="deleteOrderByOrderNo" parameterClass="int">
+		delete
+		from kakao_order
+		where order_no = #value#
+	</delete>
+	
+	<update id="updateMemberPoint" parameterClass="map">
+		update kakao_member
+		set member_point = #point#
+		where member_no = #memberNo#
+	</update>
+	
+	<select id="selectPointHistoryByOrderNo" parameterClass="map" resultClass="kr.co.kakao.vo.PointHistory">
+		select	point_history_no as no,
+				order_no as "order.no",
+				member_no as "member.no",
+				point_history_create_date as createDate,
+				point_history_change_point as changePoint
+		from kakao_point_history
+		where member_no = #memberNo#
+		and order_no = #orderNo#
+	</select>
+	
+	<delete id="deletePointHistoryByOrderNo" parameterClass="int">
+		delete
+		from kakao_point_history
+		where order_no = #value#
+	</delete>
+	
+	<!-- 찜 정보 : 조회 -->
+	<select id="getLikeslistByMemberNo" parameterClass="int" resultClass="kr.co.kakao.vo.Likes">
+		SELECT  
+				A.LIKES_NO				no,
+				A.PRODUCT_NO			"product.no",
+				B.PRODUCT_IMG			"product.imgName", 
+				B.PRODUCT_NAME			"product.name", 
+				B.PRODUCT_PRICE			"product.price"
+		FROM 
+				KAKAO_LIKES A,KAKAO_PRODUCT B, KAKAO_MEMBER C
+		WHERE 
+				A.MEMBER_NO=#member.no#
+		AND
+				A.MEMBER_NO=C.MEMBER_NO
+		AND 
+				A.PRODUCT_NO=B.PRODUCT_NO
+		ORDER BY  
+				A.LIKES_CREATE_DATE desc
+	</select>
+	
+	<!-- 찜 취소 -->
+	<delete id="deleteLikesproductBylikesno" parameterClass="int" >
+		DELETE 
+		FROM 
+				KAKAO_LIKES
+		WHERE 
+				LIKES_NO = #value#
+				
+	</delete>
+	
+	<!-- 포인트 정보 : 조회 -->
+	<select id="getMyPointInfoByMemberNo" parameterClass="int" resultClass="kr.co.kakao.vo.PointHistory">
+		SELECT 
+				B.MEMBER_POINT 						"member.point",
+				A.ORDER_NO							"order.no", 
+				A.POINT_HISTORY_CREATE_DATE 		createDate,
+				A.POINT_HISTORY_CHANGE_POINT		changePoint
+		FROM 
+				KAKAO_POINT_HISTORY A, KAKAO_MEMBER B
+		WHERE 
+				A.MEMBER_NO = B.MEMBER_NO
+		AND 
+				A.MEMBER_NO = #member.no#
+		ORDER BY A.POINT_HISTORY_CREATE_DATE desc
+	</select>
+	
+	<!--  개인 정보 : 조회	(select my information) -->
+	<select id="getMemberInfoByMemberNo" parameterClass="int" resultClass="kr.co.kakao.vo.MyInfo">
+		
+		SELECT 
+			MEMBER_NO			memNo,
+			MEMBER_ID			memId,
+			
+			MEMBER_NAME			memName,
+			MEMBER_PHONE		memPhone,	
+			MEMBER_EMAIL		memEmail,	
+			MEMBER_POINT		memPoint,	
+			MEMBER_ADDRESS		memAddress,	
+			MEMBER_USED_YN		memUsedYn,	
+			MEMBER_CREATE_DATE	memCreDate,	
+			MEMBER_BIRTH		memBirth
+		FROM 
+			KAKAO_MEMBER  
+		WHERE 
+			MEMBER_NO = #VALUE#
+			
+	</select>
+
+
+	<!-- 개인 정보 : 변경	(select my information) -->
+	<update id="updateMyInfo" parameterClass="kr.co.kakao.vo.MyInfo" >
+		
+		UPDATE 
+			KAKAO_MEMBER
+		SET 
+			MEMBER_PHONE = #memPhone#,
+			MEMBER_PWD = #memPwd#,
+			MEMBER_BIRTH = #memBirth#,
+			MEMBER_EMAIL = #memEmail#,
+			MEMBER_ADDRESS = #memAddress#
+			
+		WHERE
+			MEMBER_NO = #memNo#
+			
+	</update>
+	
+	<!-- 개인 정보: 회원 탈퇴-->
+	<update id="memberout" parameterClass="int">
+		UPDATE 
+			KAKAO_MEMBER
+		SET 
+			MEMBER_USED_YN = 'N'
+			
+		WHERE
+			MEMBER_NO = #value#
+	</update>
+	
+	<!-- 1대1 문의 : 문의 등록  -->
+	<insert id="addQuetion" parameterClass="kr.co.kakao.vo.Qna">
+		INSERT INTO 
+				KAKAO_QNA(
+						QNA_NO, 
+						MEMBER_NO, 
+						QNA_TITLE, 
+						QNA_CONTENTS, 
+						QNA_CATEGORY
+						)
+				VALUES	(
+						QUESTION_SEQ.NEXTVAL, 
+						#member.no#	,
+						#title#	,
+						#contents#,
+						#category#
+						)
+	</insert>
+	
+	<!-- 1대1 문의 : 답변 등록  -->
+	<insert id="addAnswer">
+		INSERT INTO 
+				KAKAO_QNA_REPLY(
+						QNA_REPLY_NO		no,
+						QNA_NO				"qna.no",
+						QNA_REPLY_CONTENTS	contents
+						)
+				VALUES(
+						ANSWER_SEQ.nextval,
+						#qna.no#,
+						#contents#
+						)
+	</insert>
+	
+	<!-- 1대1 문의 : 질문 조회 -->
+	<select   id="getQuestionInfoByMemberNo" parameterClass="int" resultClass="kr.co.kakao.vo.Qna">
+		SELECT 
+				QNA_NO				no, 
+				QNA_TITLE			title, 
+				QNA_CONTENTS		contents, 
+				QNA_CREATE_DATE		createDate, 
+				QNA_STATUS_YN		statusYn, 
+				QNA_CATEGORY		category
+		FROM 
+				KAKAO_QNA
+		WHERE 
+				MEMBER_NO = #member.no#
+	</select>
+	
+	<!-- 1대1 문의 : 답변 조회 -->
+	<select id="getAnswerInfoByMemberNo" parameterClass="int" resultClass="kr.co.kakao.vo.QnaReply" >
+		SELECT 
+				QNA_REPLY_NO			no, 
+				QNA_NO					"qna.no", 
+				QNA_REPLY_CONTENTS		contents, 
+				QNA_REPLY_CREATE_DATE	createDate
+		FROM 
+				KAKAO_QNA_REPLY
+		WHERE 
+				QNA_NO=#qna.no#
+	</select>
+	
+	<!-- 1대1 문의 : 상세 조회  -->
+	<select id="getdetailInfoByPageNo" parameterClass="int" resultClass="kr.co.kakao.vo.QnaReply">
+	SELECT 
+				A.QNA_NO					"qna.no",
+				A.QNA_TITLE					"qna.title", 
+				A.QNA_CONTENTS				"qna.contents", 
+				A.QNA_CATEGORY				"qna.category", 
+				A.QNA_STATUS_YN				"qna.statusYn", 
+				A.QNA_CREATE_DATE			"qna.createDate",
+				B.QNA_REPLY_CONTENTS		contents,
+				B.QNA_REPLY_CREATE_DATE		createDate
+				
+		FROM 
+				KAKAO_QNA A, KAKAO_QNA_REPLY B
+		WHERE 
+				A.QNA_NO = B.QNA_NO(+)
+				AND A.QNA_NO = #value#
+		
+		
+		
+	</select>
+	
+	
+	
+	
+	
+</sqlMap>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>	
+
+	<typeAlias alias="store" type="kr.co.kakao.vo.Store"/>
+	
+	<select id="selectAllStore" resultClass="store">
+		select	store_no as no,
+				store_name as name,
+				store_city as city,
+				store_address as address,
+				store_phone as phone,
+				store_business_hours as businessHours,
+				store_display_yn as displayYn,
+				store_latitude as latitude,
+				store_longitude as longitude
+		from kakao_store
+		where store_display_yn = 'Y'
+		order by store_no
+	</select>
+	
+	<select id="selectStoresByCity" parameterClass="string" resultClass="store">
+		select	store_no as no,
+				store_name as name,
+				store_city as city,
+				store_address as address,
+				store_phone as phone,
+				store_business_hours as businessHours,
+				store_display_yn as displayYn,
+				store_latitude as latitude,
+				store_longitude as longitude
+		from kakao_store
+		where store_city = #value#
+		and store_display_yn = 'Y'
+	</select>
+</sqlMap>
